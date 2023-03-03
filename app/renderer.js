@@ -24,7 +24,8 @@ newLinkForm.addEventListener('submit', (event) => {
         .then(findTitle)
         .then(title => storeLink(title, url))
         .then(clearForm)
-        .then(renderLinks);
+        .then(renderLinks)
+        .catch(error => handleError(error, url));
 });
 
 clearStorageButton.addEventListener('click', () => {
@@ -67,6 +68,13 @@ const convertToElement = (link) => {
 const renderLinks = () => {
     const linkElements = getLinks().map(convertToElement).join('');
     linksSection.innerHTML = linkElements;
+};
+
+const handleError = (error, url) => {
+    errorMessage.innerHTML = `
+    There was an issue adding "${url}": ${error.message}
+    `.trim();
+    setTimeout(() => errorMessage.innerText = null, 5000);
 };
 
 renderLinks();
