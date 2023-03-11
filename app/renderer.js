@@ -1,5 +1,6 @@
 "use strict";
 
+const {shell} = require('electron');
 const parser = new DOMParser();
 
 const linksSection = document.querySelector('.links');
@@ -19,6 +20,7 @@ newLinkForm.addEventListener('submit', (event) => {
     const url = newLinkUrl.value;
 
     fetch(url)
+        .then(validateResponse)
         .then(response => response.text())
         .then(parseResponse)
         .then(findTitle)
@@ -31,6 +33,13 @@ newLinkForm.addEventListener('submit', (event) => {
 clearStorageButton.addEventListener('click', () => {
     localStorage.clear();
     linksSection.innerHTML = '';
+});
+
+linksSection.addEventListener('click', (event) => {
+    if (event.target.href) {
+        event.preventDefault();
+        shell.openExternal(event.target.href);
+    }
 });
 
 const clearForm = () => {
@@ -75,6 +84,11 @@ const handleError = (error, url) => {
     There was an issue adding "${url}": ${error.message}
     `.trim();
     setTimeout(() => errorMessage.innerText = null, 5000);
+};
+
+const validateResponse = (response) => {
+    if (response.ok) {return response}
+    throw new Error(`Status code of ${response.status} ${response.statusText}`);
 };
 
 renderLinks();
